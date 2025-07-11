@@ -1,0 +1,46 @@
+HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serenidad: El Arte de Gobernarse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <img src="https://assets.unir.net/themes/unir/images/logo-unir-horizontal.svg" alt="Logo Inspiracional" class="logo">
+            <h1>Serenidad: el arte de gobernarse</h1>
+            <p class="subtitle">Un viaje de auto-reflexión guiado para descubrir tu equilibrio interior.</p>
+        </header>
+
+        <div id="inicio-container">
+            <h2>Comienza tu viaje</h2>
+            <form id="inicio-form">
+                <input type="number" id="edad" placeholder="Tu edad" required>
+                <input type="text" id="genero" placeholder="Tu género (ej. mujer, hombre, no binario)" required>
+                <input type="text" id="ocupacion" placeholder="Tu ocupación" required>
+                <input type="text" id="pelicula" placeholder="Una de tus películas favoritas" required>
+                <button type="submit">Iniciar conversación</button>
+            </form>
+        </div>
+
+        <div id="chat-container" class="hidden">
+            <div id="chat-log"></div>
+            <div id="loading" class="hidden">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <form id="chat-form">
+                <input type="text" id="user-input" placeholder="Escribe tu respuesta..." autocomplete="off">
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
