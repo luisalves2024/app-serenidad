@@ -1,24 +1,40 @@
-Python
 import os
 import openai
+import gspread
+import re
+from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from oauth2client.service_account import ServiceAccountCredentials
 
 # --- CONFIGURACIÓN INICIAL ---
-
-# 1. Creamos la aplicación Flask
 app = Flask(__name__)
-
-# 2. Configuramos CORS. ¡Muy importante! 
-# Esto permite que tu web en GitHub Pages hable con tu backend en Render.
 CORS(app) 
-
-# 3. Configuramos la clave de API de OpenAI de forma segura.
-# El programa buscará una variable llamada "OPENAI_API_KEY".
-# NUNCA escribas tu clave aquí directamente. La configuraremos en Render.
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 4. Definimos la personalidad del mentor (el prompt del sistema que creamos antes)
+# --- CONFIGURACIÓN DE GOOGLE SHEETS ---
+try:
+    scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
+             "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+    
+    # Esta línea lee las credenciales del archivo secreto que subiste a Render
+    creds_json_str = os.getenv("GCP_CREDENTIALS_JSON")
+    if creds_json_str:
+        creds_dict = eval(creds_json_str)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        # Asegúrate de que el nombre "Resultados Serenidad" coincide exactamente con el de tu hoja
+        sheet = client.open("Resultados Serenidad").sheet1 
+        print("Conexión con Google Sheets exitosa.")
+    else:
+        sheet = None
+        print("Advertencia: No se encontraron las credenciales de Google Cloud. La función de guardado está desactivada.")
+
+except Exception as e:
+    print(f"Error al conectar con Google Sheets: {e}")
+    sheet = None
+
+# --- PROMPT DEL MENTOR ---
 system_prompt = """
 Actúas como un mentor personalizado, especializado en management, recursos humanos, clima laboral, psicología personal e industrial, coaching ejecutivo y consultoría introspectiva simbólica. Tu tono combina la firmeza compasiva del estoico clásico, la claridad provocadora del pensador moderno, la ironía simbólica del estoico lúdico y la profundidad íntima de un diario reflexivo. Nunca actúas como terapeuta ni como gurú. Eres un sabio afable que guía sin imponer.
 
@@ -52,42 +68,77 @@ Cuando hayas evaluado los 9 parámetros, proporciona un resultado final estructu
 Si el usuario responde afirmativamente, inicia una conversación abierta con el mismo tono reflexivo.
 """
 
+# --- FUNCIÓN PARA GUARDAR DATOS EN GOOGLE SHEETS ---
+def guardar_resultados(texto_informe, datos_iniciales):
+    if not sheet:
+        print("No se pueden guardar los resultados, la conexión a Sheets está inactiva.")
+        return
 
-# --- EL PUNTO DE ENTRADA DE LA API (ENDPOINT) ---
+    try:
+        puntuaciones_dict = {p[0].strip(): int(p[1]) for p in re.findall(r"\|\s*(.*?)\s*\|\s*(\d+)\s*/10\s*\|", texto_informe)}
+        
+        if not puntuaciones_dict:
+            print("No se encontraron puntuaciones en el formato esperado.")
+            return
 
-# Esta es la URL que nuestro JavaScript llamará.
-# Solo acepta peticiones de tipo POST.
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # El orden debe coincidir con las columnas de tu hoja de cálculo
+        fila = [
+            now,
+            datos_iniciales.get('edad'),
+            datos_iniciales.get('genero'),
+            datos_iniciales.get('ocupacion'),
+            datos_iniciales.get('pelicula'),
+            puntuaciones_dict.get('Autocuidado limitado'),
+            puntuaciones_dict.get('Mente sin pausa'),
+            puntuaciones_dict.get('Exigencia interna crónica'),
+            puntuaciones_dict.get('Esfuerzo no reconocido'),
+            puntuaciones_dict.get('Soledad en la cima'),
+            puntuaciones_dict.get('Sobrecarga tecnológica'),
+            puntuaciones_dict.get('Conciliación desequilibrada'),
+            puntuaciones_dict.get('Maternidad penalizada'),
+            puntuaciones_dict.get('Ausencia de espacios de recarga')
+        ]
+        sheet.append_row(fila)
+        print("Resultados guardados correctamente en Google Sheets.")
+    
+    except Exception as e:
+        print(f"Error durante el guardado en Google Sheets: {e}")
+
+# --- RUTA PRINCIPAL DE LA API ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
-        # 1. Obtenemos el historial de la conversación desde la petición
         data = request.get_json()
         user_messages = data.get('messages')
 
         if not user_messages:
             return jsonify({"error": "No se recibieron mensajes."}), 400
 
-        # 2. Preparamos la lista completa de mensajes para enviar a OpenAI
-        # ¡Crucial! El prompt del sistema siempre debe ir primero.
-        messages_to_send = [
-            {"role": "system", "content": system_prompt}
-        ] + user_messages
-
-        # 3. Hacemos la llamada a la API de OpenAI
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        chat_completion = client.chat.completions.create(
-            model="gpt-4o",  # Un modelo excelente: potente y rápido
+        messages_to_send = [{"role": "system", "content": system_prompt}] + user_messages
+        
+        client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        chat_completion = client_openai.chat.completions.create(
+            model="gpt-4o",
             messages=messages_to_send,
-            temperature=0.7 # Un buen equilibrio entre creatividad y coherencia
+            temperature=0.7
         )
 
-        # 4. Extraemos la respuesta del mentor
         ai_reply = chat_completion.choices[0].message.content
 
-        # 5. Enviamos la respuesta de vuelta a la página web
+        if "| Parámetro" in ai_reply and "Puntuación /10" in ai_reply:
+            # Extraer los datos iniciales del primer mensaje del usuario
+            primer_mensaje = user_messages[0]['content'] if user_messages else ''
+            datos_iniciales = {
+                'edad': re.search(r'edad (\d+)', primer_mensaje, re.I).group(1) if re.search(r'edad (\d+)', primer_mensaje, re.I) else None,
+                'genero': re.search(r'género es (.*?),', primer_mensaje, re.I).group(1) if re.search(r'género es (.*?),', primer_mensaje, re.I) else None,
+                'ocupacion': re.search(r'ocupación es (.*?) y', primer_mensaje, re.I).group(1) if re.search(r'ocupación es (.*?) y', primer_mensaje, re.I) else None,
+                'pelicula': re.search(r'película favorita es "(.*?)"', primer_mensaje, re.I).group(1) if re.search(r'película favorita es "(.*?)"', primer_mensaje, re.I) else None
+            }
+            guardar_resultados(ai_reply, datos_iniciales)
+
         return jsonify({'reply': ai_reply})
 
     except Exception as e:
-        # Si algo sale mal, informamos del error
-        print(f"Ha ocurrido un error: {e}")
+        print(f"Ha ocurrido un error en el chat: {e}")
         return jsonify({"error": "Ha ocurrido un error en el servidor del mentor."}), 500
