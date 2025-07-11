@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let conversationHistory = [];
     
     // --- URL del Backend (la cambiaremos después) ---
-    const BACKEND_URL = 'URL_DE_TU_BACKEND_EN_RENDER'; // ¡Importante! Esto es un placeholder.
+    const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat'; // ¡Importante! Esto es un placeholder.
 
     // --- Manejador del formulario inicial ---
     inicioForm.addEventListener('submit', (e) => {
