@@ -1,38 +1,12 @@
 import os
 import openai
-import gspread
-import re
-from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from oauth2client.service_account import ServiceAccountCredentials
 
 # --- CONFIGURACIÓN INICIAL ---
 app = Flask(__name__)
 CORS(app) 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# --- CONFIGURACIÓN DE GOOGLE SHEETS ---
-try:
-    scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
-             "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-    
-    # Esta línea lee las credenciales del archivo secreto que subiste a Render
-    creds_json_str = os.getenv("GCP_CREDENTIALS_JSON")
-    if creds_json_str:
-        creds_dict = eval(creds_json_str)
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        # Asegúrate de que el nombre "Resultados Serenidad" coincide exactamente con el de tu hoja
-        sheet = client.open("Resultados Serenidad").sheet1 
-        print("Conexión con Google Sheets exitosa.")
-    else:
-        sheet = None
-        print("Advertencia: No se encontraron las credenciales de Google Cloud. La función de guardado está desactivada.")
-
-except Exception as e:
-    print(f"Error al conectar con Google Sheets: {e}")
-    sheet = None
 
 # --- PROMPT DEL MENTOR ---
 system_prompt = """
@@ -68,43 +42,6 @@ Cuando hayas evaluado los 9 parámetros, proporciona un resultado final estructu
 Si el usuario responde afirmativamente, inicia una conversación abierta con el mismo tono reflexivo.
 """
 
-# --- FUNCIÓN PARA GUARDAR DATOS EN GOOGLE SHEETS ---
-def guardar_resultados(texto_informe, datos_iniciales):
-    if not sheet:
-        print("No se pueden guardar los resultados, la conexión a Sheets está inactiva.")
-        return
-
-    try:
-        puntuaciones_dict = {p[0].strip(): int(p[1]) for p in re.findall(r"\|\s*(.*?)\s*\|\s*(\d+)\s*/10\s*\|", texto_informe)}
-        
-        if not puntuaciones_dict:
-            print("No se encontraron puntuaciones en el formato esperado.")
-            return
-
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # El orden debe coincidir con las columnas de tu hoja de cálculo
-        fila = [
-            now,
-            datos_iniciales.get('edad'),
-            datos_iniciales.get('genero'),
-            datos_iniciales.get('ocupacion'),
-            datos_iniciales.get('pelicula'),
-            puntuaciones_dict.get('Autocuidado limitado'),
-            puntuaciones_dict.get('Mente sin pausa'),
-            puntuaciones_dict.get('Exigencia interna crónica'),
-            puntuaciones_dict.get('Esfuerzo no reconocido'),
-            puntuaciones_dict.get('Soledad en la cima'),
-            puntuaciones_dict.get('Sobrecarga tecnológica'),
-            puntuaciones_dict.get('Conciliación desequilibrada'),
-            puntuaciones_dict.get('Maternidad penalizada'),
-            puntuaciones_dict.get('Ausencia de espacios de recarga')
-        ]
-        sheet.append_row(fila)
-        print("Resultados guardados correctamente en Google Sheets.")
-    
-    except Exception as e:
-        print(f"Error durante el guardado en Google Sheets: {e}")
-
 # --- RUTA PRINCIPAL DE LA API ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
@@ -126,19 +63,9 @@ def chat():
 
         ai_reply = chat_completion.choices[0].message.content
 
-        if "| Parámetro" in ai_reply and "Puntuación /10" in ai_reply:
-            # Extraer los datos iniciales del primer mensaje del usuario
-            primer_mensaje = user_messages[0]['content'] if user_messages else ''
-            datos_iniciales = {
-                'edad': re.search(r'edad (\d+)', primer_mensaje, re.I).group(1) if re.search(r'edad (\d+)', primer_mensaje, re.I) else None,
-                'genero': re.search(r'género es (.*?),', primer_mensaje, re.I).group(1) if re.search(r'género es (.*?),', primer_mensaje, re.I) else None,
-                'ocupacion': re.search(r'ocupación es (.*?) y', primer_mensaje, re.I).group(1) if re.search(r'ocupación es (.*?) y', primer_mensaje, re.I) else None,
-                'pelicula': re.search(r'película favorita es "(.*?)"', primer_mensaje, re.I).group(1) if re.search(r'película favorita es "(.*?)"', primer_mensaje, re.I) else None
-            }
-            guardar_resultados(ai_reply, datos_iniciales)
-
         return jsonify({'reply': ai_reply})
 
     except Exception as e:
+        # Imprimimos el error en los logs de Render para poder verlo
         print(f"Ha ocurrido un error en el chat: {e}")
         return jsonify({"error": "Ha ocurrido un error en el servidor del mentor."}), 500
