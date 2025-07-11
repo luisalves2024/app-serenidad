@@ -1,4 +1,3 @@
-JavaScript
 document.addEventListener('DOMContentLoaded', () => {
     // --- Referencias a los elementos del DOM ---
     const inicioContainer = document.getElementById('inicio-container');
