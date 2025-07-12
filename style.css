@@ -3,7 +3,7 @@
 
 /* --- Paleta de Colores y Estilos Base --- */
 :root {
-    --color-principal: #3a7c8c; /* Un azul-verde más suave y sereno */
+    --color-principal: #3a7c8c;
     --color-fondo: #f4f6f8;
     --color-tarjeta: #ffffff;
     --color-texto: #333333;
@@ -19,55 +19,41 @@ body {
     line-height: 1.6;
 }
 
-/* --- El Encabezado con Imagen de Fondo (La Gran Mejora) --- */
-header {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1540280369237-622f68354f55?q=80&w=2070&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    text-align: center;
-    padding: 80px 20px;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-header h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-    margin: 0;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-}
-
-header .subtitle {
-    font-size: 1.2rem;
-    font-weight: 400;
-    margin-top: 15px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    opacity: 0.9;
-}
-
 /* --- Estilo Acogedor del Contenedor Principal ("Tarjeta") --- */
 .container {
     max-width: 700px;
-    margin: -50px auto 40px auto; /* El margen negativo lo sube sobre la imagen */
+    margin: 40px auto;
     background-color: var(--color-tarjeta);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 40px;
     position: relative;
-    z-index: 10;
+    /* LA LÍNEA MÁS IMPORTANTE: Recorta todo lo que se salga de los bordes redondeados */
+    overflow: hidden; 
+    /* Fíjate que aquí NO hay 'padding' */
 }
 
-h2 {
+/* --- Estilo del Faldón Superior --- */
+.faldon-banner {
+    width: 100%; /* Hace que la imagen ocupe todo el ancho del formulario */
+    display: block; /* Elimina un pequeño espacio extra que a veces queda debajo de las imágenes */
+}
+
+/* --- Espaciado para el Contenido Interno --- */
+#inicio-container, #chat-container {
+    padding: 40px;
+}
+
+/* --- Estilo para el Título del Formulario (lo usaremos después) --- */
+#inicio-container h2 {
     text-align: center;
     color: var(--color-principal);
     font-weight: 600;
+    font-size: 1.8rem;
+    margin-top: 0;
     margin-bottom: 30px;
 }
 
-/* --- Estilos Suavizados para Formularios y Botones --- */
+/* --- Estilos para Formularios y Botones --- */
 input[type="text"], input[type="number"] {
     width: 100%;
     padding: 15px;
@@ -130,40 +116,20 @@ button:hover {
     background-color: var(--color-principal);
     color: white;
     align-self: flex-end;
-    border-bottom-right-radius: 5px; /* Detalle de estilo */
+    border-bottom-right-radius: 5px;
 }
 
 .ai-message {
     background-color: #e9ecef;
     color: var(--color-texto);
     align-self: flex-start;
-    border-bottom-left-radius: 5px; /* Detalle de estilo */
+    border-bottom-left-radius: 5px;
 }
 
-/* --- Clases de utilidad y animación de carga (sin cambios) --- */
-.hidden {
-    display: none !important;
-}
+.hidden { display: none !important; }
 
-#loading {
-    display: flex;
-    justify-content: flex-start;
-    padding: 10px;
-}
-.dot {
-    width: 8px; height: 8px; margin: 0 4px;
-    background-color: var(--color-texto-suave);
-    border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out both;
-}
+#loading { display: flex; justify-content: flex-start; padding: 10px; }
+.dot { width: 8px; height: 8px; margin: 0 4px; background-color: var(--color-texto-suave); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
 .dot:nth-child(1) { animation-delay: -0.32s; }
 .dot:nth-child(2) { animation-delay: -0.16s; }
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1.0); }
-}
-/* --- Estilo del Logo --- */
-.logo {
-    max-height: 500px;  /* Ajusta este valor como desees */
-    margin-bottom: 20px;
-}
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
