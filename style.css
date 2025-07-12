@@ -164,6 +164,6 @@ button:hover {
 }
 /* --- Estilo del Logo --- */
 .logo {
-    max-height: 80px;  /* Ajusta este valor como desees */
+    max-height: 100px;  /* Ajusta este valor como desees */
     margin-bottom: 20px;
 }
