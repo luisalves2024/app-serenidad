@@ -32,10 +32,13 @@ body {
     /* Fíjate que aquí NO hay 'padding' */
 }
 
-/* --- Estilo del Faldón Superior --- */
+/* --- Estilo del Faldón Superior (NUEVA VERSIÓN) --- */
 .faldon-banner {
-    width: 100%; /* Hace que la imagen ocupe todo el ancho del formulario */
-    display: block; /* Elimina un pequeño espacio extra que a veces queda debajo de las imágenes */
+    height: 180px; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Define la altura fija del faldón. */
+    width: 100%;
+    background-image: url('faldon.png'); /* <-- Pone tu imagen como fondo. */
+    background-size: cover;       /* Escala la imagen para cubrir el espacio sin deformarla. */
+    background-position: center;  /* Centra la imagen para que se vea lo más importante. */
 }
 
 /* --- Espaciado para el Contenido Interno --- */
