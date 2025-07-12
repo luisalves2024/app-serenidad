@@ -37,8 +37,9 @@ body {
     height: 180px; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Define la altura fija del faldón. */
     width: 100%;
     background-image: url('faldon-woom.png'); /* <-- Pone tu imagen como fondo. */
-    background-size: cover;       /* Escala la imagen para cubrir el espacio sin deformarla. */
-    background-position: center;  /* Centra la imagen para que se vea lo más importante. */
+    background-size: contain; /* <-- CAMBIO HECHO AQUÍ */
+    background-position: center;
+    background-repeat: no-repeat; /* <-- AÑADIDO PARA PERFECCIONAR */
 }
 
 /* --- Espaciado para el Contenido Interno --- */
