@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Estado de la Conversación ---
     let conversationHistory = [];
-
-    // --- URL del Backend ---
-    const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat';
+    
+    // --- URL del Backend (VERSIÓN CORREGIDA) ---
+    const BACKEND_URL = 'https://aplicacion-serenidad-backend.onrender.com/api/chat';
 
     // --- Manejadores de Formularios ---
     inicioForm.addEventListener('submit', (e) => {
@@ -70,43 +70,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function agregarMensaje(texto, remitente) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${remitente}-message`);
-
+    
         if (remitente === 'ai' && texto.includes('### Evaluación Numérica')) {
             messageElement.innerHTML = generarHtmlDeResultados(texto);
         } else {
             messageElement.innerText = texto; 
         }
-
+        
         chatLog.appendChild(messageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function generarHtmlDeResultados(textoMarkdown) {
         const getColorForScore = (score) => {
-            if (score <= 3) return '#5cb85c'; // Verde
-            if (score <= 6) return '#f0ad4e'; // Naranja
-            if (score <= 10) return '#d9534f'; // Rojo
+            if (score <= 3) return '#5cb85c';
+            if (score <= 6) return '#f0ad4e';
+            if (score <= 10) return '#d9534f';
             return '#777';
         };
-
         let partes = textoMarkdown.split('### Evaluación Numérica');
         let textoIntroductorio = partes[0];
         let restoDelTexto = partes[1] || '';
-
         const regex = /\|\s*(.*?)\s*\|\s*(\d+|N\/A)\s*\|/g;
-
         let tablaHtml = '<h3>Evaluación Numérica</h3><div class="resultados-container">';
         let match;
         while ((match = regex.exec(restoDelTexto)) !== null) {
             const parametro = match[1].trim();
             if (parametro.includes('---') || parametro.toLowerCase().includes('parámetro')) continue;
-
             const puntuacionRaw = match[2].trim();
             if (puntuacionRaw.toLowerCase() === 'n/a') continue;
-
             const puntuacion = parseInt(puntuacionRaw, 10);
             const color = getColorForScore(puntuacion);
-
             tablaHtml += `
                 <div class="resultado-item">
                     <span class="parametro-label">${parametro} (${puntuacion}/10)</span>
@@ -118,9 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         tablaHtml += '</div>';
         tablaHtml += '<p class="leyenda-resultados">(Escala 0-10: 0 es equilibrio total, 10 es sobrecarga extrema)</p>';
-
         let textoFinal = restoDelTexto.replace(/\|[\s\S]*/, '');
-
         return textoIntroductorio + tablaHtml + textoFinal;
     }
 });
