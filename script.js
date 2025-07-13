@@ -8,31 +8,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const loadingIndicator = document.getElementById('loading');
 
-    // --- ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA! ---
-    let conversationHistory = []; 
+    // --- Estado de la Conversación ---
+    let conversationHistory = [];
     
     // --- URL del Backend ---
     const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat';
 
-    // --- Manejador del formulario inicial ---
+    // --- Manejadores de Formularios ---
     inicioForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const edad = document.getElementById('edad').value;
         const genero = document.getElementById('genero').value;
         const ocupacion = document.getElementById('ocupacion').value;
         const pelicula = document.getElementById('pelicula').value;
-
         const primerMensaje = `El usuario tiene ${edad} años, su género es ${genero}, su ocupación es ${ocupacion} y su película favorita es "${pelicula}". Inicia la conversación.`;
-        
         conversationHistory.push({ role: 'user', content: primerMensaje });
-
         inicioContainer.classList.add('hidden');
         chatContainer.classList.remove('hidden');
-
         enviarConversacionAlBackend();
     });
 
-    // --- Manejador del formulario del chat ---
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const userMessage = userInput.value.trim();
@@ -44,25 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Función para enviar datos al backend ---
+    // --- Funciones Principales ---
     async function enviarConversacionAlBackend() {
         loadingIndicator.classList.remove('hidden');
         chatForm.classList.add('hidden');
-
         try {
             const response = await fetch(BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ messages: conversationHistory })
             });
-
-            if (!response.ok) {
-                throw new Error(`Error del servidor: ${response.statusText}`);
-            }
-
+            if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
             const data = await response.json();
             const aiMessage = data.reply;
-            
             setTimeout(() => {
                 loadingIndicator.classList.add('hidden');
                 agregarMensaje(aiMessage, 'ai');
@@ -70,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatForm.classList.remove('hidden');
                 userInput.focus();
             }, 500);
-
         } catch (error) {
             loadingIndicator.classList.add('hidden');
             chatForm.classList.remove('hidden');
@@ -79,12 +67,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Función de ayuda para añadir mensajes al log ---
     function agregarMensaje(texto, remitente) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${remitente}-message`);
-        messageElement.innerText = texto; 
+    
+        if (remitente === 'ai' && texto.includes('### Evaluación Numérica')) {
+            messageElement.innerHTML = generarHtmlDeResultados(texto);
+        } else {
+            messageElement.innerText = texto; 
+        }
+        
         chatLog.appendChild(messageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function generarHtmlDeResultados(textoMarkdown) {
+        const getColorForScore = (score) => {
+            if (score <= 3) return '#5cb85c'; // Verde
+            if (score <= 6) return '#f0ad4e'; // Naranja
+            if (score <= 10) return '#d9534f'; // Rojo
+            return '#777';
+        };
+
+        let partes = textoMarkdown.split('### Evaluación Numérica');
+        let textoIntroductorio = partes[0];
+        let restoDelTexto = partes[1] || '';
+
+        // Regex mejorada para capturar | Parámetro | Puntuación |
+        const regex = /\|\s*(.*?)\s*\|\s*(\d+|N\/A)\s*\|/g;
+        
+        let tablaHtml = '<h3>Evaluación Numérica</h3><div class="resultados-container">';
+        let match;
+        while ((match = regex.exec(restoDelTexto)) !== null) {
+            const parametro = match[1].trim();
+            if (parametro.includes('---') || parametro.toLowerCase().includes('parámetro')) continue;
+
+            const puntuacionRaw = match[2].trim();
+            if (puntuacionRaw.toLowerCase() === 'n/a') continue; // Saltar N/A
+
+            const puntuacion = parseInt(puntuacionRaw, 10);
+            const color = getColorForScore(puntuacion);
+
+            tablaHtml += `
+                <div class="resultado-item">
+                    <span class="parametro-label">${parametro}</span>
+                    <div class="barra-progreso-contenedor">
+                        <div class="barra-progreso-relleno" style="width: ${puntuacion * 10}%; background-color: ${color};"></div>
+                    </div>
+                </div>
+            `;
+        }
+        tablaHtml += '</div>';
+
+        // Limpiamos la parte final del texto
+        let textoFinal = restoDelTexto.replace(/\|[\s\S]*/, '');
+
+        return textoIntroductorio + tablaHtml + textoFinal;
     }
 });
