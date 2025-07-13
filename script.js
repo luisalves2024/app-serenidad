@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias a los elementos del DOM ---
     const inicioContainer = document.getElementById('inicio-container');
     const chatContainer = document.getElementById('chat-container');
     const inicioForm = document.getElementById('inicio-form');
@@ -7,14 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
     const loadingIndicator = document.getElementById('loading');
-
-    // --- Estado de la Conversación ---
     let conversationHistory = [];
-    
-    // --- URL del Backend (VERSIÓN CORREGIDA) ---
     const BACKEND_URL = 'https://aplicacion-serenidad-backend.onrender.com/api/chat';
 
-    // --- Manejadores de Formularios ---
     inicioForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const edad = document.getElementById('edad').value;
@@ -39,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Funciones Principales ---
     async function enviarConversacionAlBackend() {
         loadingIndicator.classList.remove('hidden');
         chatForm.classList.add('hidden');
