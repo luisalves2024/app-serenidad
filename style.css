@@ -1,122 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
-:root {
-    --color-principal: #3a7c8c;
-    --color-fondo: #f4f6f8;
-    --color-tarjeta: #ffffff;
-    --color-texto: #333333;
-    --color-texto-suave: #6c757d;
-    --fuente-principal: 'Montserrat', sans-serif;
-}
-
-body {
-    font-family: var(--fuente-principal);
-    background-color: var(--color-fondo);
-    color: var(--color-texto);
-    margin: 0;
-    line-height: 1.6;
-}
-
-.container {
-    max-width: 700px;
-    margin: 40px auto;
-    background-color: var(--color-tarjeta);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden; 
-}
-
-.faldon-banner {
-    height: 180px; 
-    width: 100%;
-    background-image: url('faldon-woom.png');
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#inicio-container, #chat-container {
-    padding: 40px;
-}
-
-input[type="text"], input[type="number"] {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-family: var(--fuente-principal);
-    font-size: 1rem;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-input[type="text"]:focus, input[type="number"]:focus {
-    outline: none;
-    border-color: var(--color-principal);
-    box-shadow: 0 0 0 3px rgba(58, 124, 140, 0.2);
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    background-color: var(--color-principal);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-family: var(--fuente-principal);
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-button:hover {
-    background-color: #2c6b7a;
-    transform: translateY(-2px);
-}
-
-#chat-log {
-    height: 400px;
-    overflow-y: auto;
-    border-top: 1px solid #e9ecef;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.message {
-    padding: 12px 18px;
-    border-radius: 20px;
-    max-width: 85%;
-    line-height: 1.5;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    white-space: pre-wrap;
-    margin-bottom: 15px;
-}
-
-.user-message {
-    background-color: var(--color-principal);
-    color: white;
-    margin-left: auto;
-    border-bottom-right-radius: 5px;
-}
-
-.ai-message {
-    background-color: #e9ecef;
-    color: var(--color-texto);
-    margin-right: auto;
-    border-bottom-left-radius: 5px;
-}
-
+:root { --color-principal: #3a7c8c; --color-fondo: #f4f6f8; --color-tarjeta: #ffffff; --color-texto: #333333; --color-texto-suave: #6c757d; --fuente-principal: 'Montserrat', sans-serif; }
+body { font-family: var(--fuente-principal); background-color: var(--color-fondo); color: var(--color-texto); margin: 0; line-height: 1.6; }
+.container { max-width: 700px; margin: 40px auto; background-color: var(--color-tarjeta); border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); position: relative; overflow: hidden; }
+.faldon-banner { height: 180px; width: 100%; background-image: url('faldon-woom.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
+#inicio-container, #chat-container { padding: 40px; }
+input[type="text"], input[type="number"] { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; font-family: var(--fuente-principal); font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; }
+input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(58, 124, 140, 0.2); }
+button { width: 100%; padding: 15px; background-color: var(--color-principal); color: white; border: none; border-radius: 8px; font-family: var(--fuente-principal); font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+button:hover { background-color: #2c6b7a; transform: translateY(-2px); }
+#chat-log { height: 400px; overflow-y: auto; border-top: 1px solid #e9ecef; padding: 20px; margin-bottom: 20px; }
+.message { padding: 12px 18px; border-radius: 20px; max-width: 85%; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: pre-wrap; margin-bottom: 15px; }
+.user-message { background-color: var(--color-principal); color: white; margin-left: auto; border-bottom-right-radius: 5px; }
+.ai-message { background-color: #e9ecef; color: var(--color-texto); margin-right: auto; border-bottom-left-radius: 5px; }
 .hidden { display: none !important; }
-
 #loading { display: flex; justify-content: flex-start; padding: 10px; }
 .dot { width: 8px; height: 8px; margin: 0 4px; background-color: var(--color-texto-suave); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
 .dot:nth-child(1) { animation-delay: -0.32s; }
 .dot:nth-child(2) { animation-delay: -0.16s; }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-
 .resultados-container { margin-top: 20px; margin-bottom: 20px; border-top: 1px solid #eee; padding-top: 20px; }
 .resultado-item { margin-bottom: 15px; }
 .parametro-label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #555; }
