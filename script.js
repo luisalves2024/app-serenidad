@@ -8,11 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const loadingIndicator = document.getElementById('loading');
 
-    // --- Estado de la Conversación ---
-    let conversationHistory = [];
-    
-    // --- URL del Backend ---
-    const BACKEND_URL = 'https://aplicacion-serenidad-backend.onrender.com/api/chat';
+    // --- ¡AQUÍ ESTÁ LA LÍNEA CRÍTICA! ---
+    // Asegúrate de que tu URL de Render es idéntica a esta.
+    const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat';
 
     // --- Manejador del formulario inicial ---
     inicioForm.addEventListener('submit', (e) => {
@@ -83,55 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function agregarMensaje(texto, remitente) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${remitente}-message`);
-    
-        if (remitente === 'ai' && texto.includes('| Parámetro')) {
-            messageElement.innerHTML = generarHtmlDeResultados(texto);
-        } else {
-            messageElement.innerText = texto; 
-        }
-        
+        messageElement.innerText = texto; 
         chatLog.appendChild(messageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    // --- Función para transformar los resultados en barras de progreso ---
-    function generarHtmlDeResultados(textoMarkdown) {
-        const getColorForScore = (score) => {
-            if (score <= 3) return '#5cb85c'; // Verde
-            if (score <= 6) return '#f0ad4e'; // Amarillo
-            if (score <= 10) return '#d9534f'; // Rojo
-            return '#777';
-        };
-
-        let html = textoMarkdown;
-        const regex = /\|\s*(.*?)\s*\|\s*(\d+)\s*\/10\s*\|/g;
-        
-        let tablaHtml = '<div class="resultados-container">';
-        let match;
-        while ((match = regex.exec(textoMarkdown)) !== null) {
-            const parametro = match[1].trim();
-            if (parametro.includes('---') || parametro.toLowerCase().includes('parámetro')) continue;
-
-            const puntuacion = parseInt(match[2], 10);
-            const color = getColorForScore(puntuacion);
-
-            tablaHtml += `
-                <div class="resultado-item">
-                    <span class="parametro-label">${parametro} (${puntuacion}/10)</span>
-                    <div class="barra-progreso-contenedor">
-                        <div class="barra-progreso-relleno" style="width: ${puntuacion * 10}%; background-color: ${color};"></div>
-                    </div>
-                </div>
-            `;
-        }
-        tablaHtml += '</div>';
-
-        const tablaMarkdownRegex = /Tabla de puntuación,[\s\S]*?(\n\n|$)/;
-        html = html.replace(tablaMarkdownRegex, tablaHtml);
-
-        const visualMarkdownRegex = /Representación visual[\s\S]*/;
-        html = html.replace(visualMarkdownRegex, '');
-
-        return html;
     }
 });
