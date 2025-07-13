@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Estado de la Conversación ---
     let conversationHistory = [];
-    
+
     // --- URL del Backend ---
     const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat';
 
@@ -70,13 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function agregarMensaje(texto, remitente) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${remitente}-message`);
-    
+
         if (remitente === 'ai' && texto.includes('### Evaluación Numérica')) {
             messageElement.innerHTML = generarHtmlDeResultados(texto);
         } else {
             messageElement.innerText = texto; 
         }
-        
+
         chatLog.appendChild(messageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
     }
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let restoDelTexto = partes[1] || '';
 
         const regex = /\|\s*(.*?)\s*\|\s*(\d+|N\/A)\s*\|/g;
-        
+
         let tablaHtml = '<h3>Evaluación Numérica</h3><div class="resultados-container">';
         let match;
         while ((match = regex.exec(restoDelTexto)) !== null) {
@@ -117,4 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
         tablaHtml += '</div>';
-        tablaHtml += '<p class="leyenda-resultados">(Escala 0-10: 0 es equilibrio total, 10 es sobrecarga extrema)</p
+        tablaHtml += '<p class="leyenda-resultados">(Escala 0-10: 0 es equilibrio total, 10 es sobrecarga extrema)</p>';
+
+        let textoFinal = restoDelTexto.replace(/\|[\s\S]*/, '');
+
+        return textoIntroductorio + tablaHtml + textoFinal;
+    }
+});
