@@ -53,7 +53,7 @@ def chat():
             return jsonify({"error": "No se recibieron mensajes."}), 400
 
         messages_to_send = [{"role": "system", "content": system_prompt}] + user_messages
-        
+
         client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         chat_completion = client_openai.chat.completions.create(
             model="gpt-4o",
