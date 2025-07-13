@@ -8,8 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const loadingIndicator = document.getElementById('loading');
 
-    // --- ¡AQUÍ ESTÁ LA LÍNEA CRÍTICA! ---
-    // Asegúrate de que tu URL de Render es idéntica a esta.
+    // --- ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA! ---
+    let conversationHistory = []; 
+    
+    // --- URL del Backend ---
     const BACKEND_URL = 'https://app-serenidad-backend.onrender.com/api/chat';
 
     // --- Manejador del formulario inicial ---
