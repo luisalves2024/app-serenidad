@@ -45,15 +45,20 @@ Si el usuario responde afirmativamente, inicia una conversación abierta con el 
 # --- RUTA PRINCIPAL DE LA API ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
+    # --- ¡AQUÍ ESTÁ EL CHIVATO! ---
+    print("¡PETICIÓN RECIBIDA! Entrando en la función de chat.")
+
     try:
         data = request.get_json()
         user_messages = data.get('messages')
 
         if not user_messages:
+            print("Error: No se recibieron mensajes en la petición.")
             return jsonify({"error": "No se recibieron mensajes."}), 400
 
         messages_to_send = [{"role": "system", "content": system_prompt}] + user_messages
 
+        print("Enviando petición a OpenAI...")
         client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         chat_completion = client_openai.chat.completions.create(
             model="gpt-4o",
@@ -62,10 +67,11 @@ def chat():
         )
 
         ai_reply = chat_completion.choices[0].message.content
+        print("Respuesta recibida de OpenAI con éxito.")
 
         return jsonify({'reply': ai_reply})
 
     except Exception as e:
         # Imprimimos el error en los logs de Render para poder verlo
-        print(f"Ha ocurrido un error en el chat: {e}")
+        print(f"HA OCURRIDO UN ERROR DENTRO DE LA FUNCIÓN CHAT: {e}")
         return jsonify({"error": "Ha ocurrido un error en el servidor del mentor."}), 500
