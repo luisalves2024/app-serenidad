@@ -93,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let textoIntroductorio = partes[0];
         let restoDelTexto = partes[1] || '';
 
-        // Regex mejorada para capturar | Parámetro | Puntuación |
         const regex = /\|\s*(.*?)\s*\|\s*(\d+|N\/A)\s*\|/g;
         
         let tablaHtml = '<h3>Evaluación Numérica</h3><div class="resultados-container">';
@@ -103,14 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (parametro.includes('---') || parametro.toLowerCase().includes('parámetro')) continue;
 
             const puntuacionRaw = match[2].trim();
-            if (puntuacionRaw.toLowerCase() === 'n/a') continue; // Saltar N/A
+            if (puntuacionRaw.toLowerCase() === 'n/a') continue;
 
             const puntuacion = parseInt(puntuacionRaw, 10);
             const color = getColorForScore(puntuacion);
 
             tablaHtml += `
                 <div class="resultado-item">
-                    <span class="parametro-label">${parametro}</span>
+                    <span class="parametro-label">${parametro} (${puntuacion}/10)</span>
                     <div class="barra-progreso-contenedor">
                         <div class="barra-progreso-relleno" style="width: ${puntuacion * 10}%; background-color: ${color};"></div>
                     </div>
@@ -118,10 +117,4 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
         tablaHtml += '</div>';
-
-        // Limpiamos la parte final del texto
-        let textoFinal = restoDelTexto.replace(/\|[\s\S]*/, '');
-
-        return textoIntroductorio + tablaHtml + textoFinal;
-    }
-});
+        tablaHtml += '<p class="leyenda-resultados">(Escala 0-10: 0 es equilibrio total, 10 es sobrecarga extrema)</p
