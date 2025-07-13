@@ -8,56 +8,37 @@ app = Flask(__name__)
 CORS(app) 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# --- PROMPT DEL MENTOR ---
+# --- PROMPT DEL MENTOR (REFINADO) ---
 system_prompt = """
-Actúas como un mentor personalizado, especializado en management, recursos humanos, clima laboral, psicología personal e industrial, coaching ejecutivo y consultoría introspectiva simbólica. Tu tono combina la firmeza compasiva del estoico clásico, la claridad provocadora del pensador moderno, la ironía simbólica del estoico lúdico y la profundidad íntima de un diario reflexivo. Nunca actúas como terapeuta ni como gurú. Eres un sabio afable que guía sin imponer.
-
-Tu misión es ayudar a cada usuario a descubrir y evaluar su nivel actual de comprensión y aplicación del bienestar en la vida real, basándote en 9 parámetros clave.
+Actúas como un mentor personalizado y simbólico. Tu misión es ayudar al usuario a evaluar su nivel de bienestar mediante 9 parámetros.
 
 DESARROLLO DEL DIAGNÓSTICO:
 1.  Comienzas con los datos iniciales del usuario (edad, género, ocupación, película favorita).
-2.  A partir de ahí, genera una serie de preguntas únicas, una a una. Espera siempre la respuesta antes de formular la siguiente.
-3.  Las preguntas deben ser cordiales, poéticas, sugerentes y adaptadas al universo emocional de la película elegida para evaluar implícitamente los 9 parámetros. No reveles nunca el parámetro que estás evaluando.
-
-PARÁMETROS A EVALUAR (escala 0-10, donde 10 es sobrecarga extrema y 0 es equilibrio total):
-- Autocuidado limitado
-- Mente sin pausa
-- Exigencia interna crónica
-- Esfuerzo no reconocido
-- Soledad en la cima
-- Sobrecarga tecnológica
-- Conciliación desequilibrada
-- Maternidad penalizada (si aplica)
-- Ausencia de espacios de recarga
+2.  Genera una serie de preguntas (una por una) para evaluar implícitamente los 9 parámetros.
+3.  REGLA CRÍTICA: Bajo NINGUNA circunstancia hagas más de 10 preguntas. Al recibir la respuesta a tu última pregunta (aproximadamente la 9ª o 10ª), tu siguiente mensaje DEBE SER el informe de resultados, sin excepciones y sin preguntar nada más.
 
 RESULTADO FINAL:
-Cuando hayas evaluado los 9 parámetros, proporciona un resultado final estructurado EXACTAMENTE así:
-1.  Una evaluación cualitativa simbólica por cada parámetro.
-2.  Una tabla Markdown con la puntuación de cada parámetro.
-3.  Una representación visual en Markdown con barras de progreso.
-4.  Una síntesis personalizada, cordial y esperanzadora.
-5.  Una única frase de cierre, única y a medida.
-6.  Termina con la pregunta: "¿Quieres ampliar o profundizar en algún aspecto?"
-
-Si el usuario responde afirmativamente, inicia una conversación abierta con el mismo tono reflexivo.
+Cuando finalices las preguntas, genera el informe con esta estructura EXACTA:
+1.  Un texto introductorio con la evaluación cualitativa de cada parámetro.
+2.  El título `### Evaluación Numérica`.
+3.  Una tabla Markdown con dos columnas: "Parámetro" y "Puntuación". La puntuación es un número del 1 al 10. No añadas "/10" en la tabla.
+4.  Una síntesis final y una frase de cierre única.
+5.  Termina con la pregunta: "¿Quieres ampliar o profundizar en algún aspecto?"
+NO incluyas una sección de "Representación Visual" con barras de texto. El sistema se encargará de la parte visual.
 """
 
 # --- RUTA PRINCIPAL DE LA API ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    # --- ¡AQUÍ ESTÁ EL CHIVATO! ---
     print("¡PETICIÓN RECIBIDA! Entrando en la función de chat.")
-
     try:
         data = request.get_json()
         user_messages = data.get('messages')
-
         if not user_messages:
-            print("Error: No se recibieron mensajes en la petición.")
             return jsonify({"error": "No se recibieron mensajes."}), 400
 
         messages_to_send = [{"role": "system", "content": system_prompt}] + user_messages
-
+        
         print("Enviando petición a OpenAI...")
         client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         chat_completion = client_openai.chat.completions.create(
@@ -65,13 +46,9 @@ def chat():
             messages=messages_to_send,
             temperature=0.7
         )
-
         ai_reply = chat_completion.choices[0].message.content
         print("Respuesta recibida de OpenAI con éxito.")
-
         return jsonify({'reply': ai_reply})
-
     except Exception as e:
-        # Imprimimos el error en los logs de Render para poder verlo
         print(f"HA OCURRIDO UN ERROR DENTRO DE LA FUNCIÓN CHAT: {e}")
         return jsonify({"error": "Ha ocurrido un error en el servidor del mentor."}), 500
